@@ -50,16 +50,17 @@ function getAgentIcon(agentId: string) {
 
 export default function AgentsGrid({ onSelectAgent, onChat }: AgentsGridProps) {
   const [chatValue, setChatValue] = useState("");
-  // Default: only first 2 sections expanded
+  // Default: Procurement collapsed, Inbound and Outbound expanded
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({
-    0: true,
+    0: false,
     1: true,
+    2: true,
   });
 
   const rows: { title: string; agents: AgentInfo[] }[] = [
     {
       title: "Procurement",
-      agents: agentCategories.find((c) => c.id === "procurement")!.agents,
+      agents: agentCategories.find((c) => c.id === "procurement")!.agents.filter((a) => a.id !== "quote-agent"),
     },
     {
       title: "Inbound · Inventory · Order Processing",
@@ -74,6 +75,7 @@ export default function AgentsGrid({ onSelectAgent, onChat }: AgentsGridProps) {
       agents: [
         ...agentCategories.find((c) => c.id === "outbound")!.agents,
         ...agentCategories.find((c) => c.id === "transportation-logistics")!.agents,
+        ...agentCategories.find((c) => c.id === "procurement")!.agents.filter((a) => a.id === "quote-agent"),
       ],
     },
     {
