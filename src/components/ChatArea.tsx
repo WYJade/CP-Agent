@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { AgentInfo } from "@/data/agents";
 import { ChatMessage, SavedCase } from "@/types/agent";
 import ResultPanel from "@/components/ResultPanel";
+import { useTheme } from "@/context/ThemeContext";
 
 export interface ResultItem {
   id: string;
@@ -27,6 +28,8 @@ interface ChatAreaProps {
 }
 
 export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: ChatAreaProps) {
+  const { theme } = useTheme();
+  const d = theme === "dark";
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
@@ -98,58 +101,40 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   };
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-[#0d0d1a]">
+    <div className={`flex-1 flex overflow-hidden ${d ? "bg-[#0d0d1a]" : "bg-white"}`}>
       {/* Chat Column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Agent Header */}
-        <div className="h-11 border-b border-[#2a2a3e] flex items-center px-4 gap-3 flex-shrink-0 bg-[#12121f]">
-          <button onClick={onBack} className="p-1 hover:bg-[#2a2a3e] rounded transition-colors">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+        <div className={`h-11 border-b flex items-center px-4 gap-3 flex-shrink-0 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-white"}`}>
+          <button onClick={onBack} className={`p-1 rounded transition-colors ${d ? "hover:bg-[#2a2a3e]" : "hover:bg-gray-100"}`}>
+            <svg className={`w-4 h-4 ${d ? "text-gray-400" : "text-gray-500"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <div className="w-5 h-5 rounded bg-purple-600/30 flex items-center justify-center">
-            <svg className="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+          <div className={`w-5 h-5 rounded flex items-center justify-center ${d ? "bg-purple-600/30" : "bg-purple-100"}`}>
+            <svg className={`w-3 h-3 ${d ? "text-purple-400" : "text-purple-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
-          <span className="text-xs font-medium text-gray-200">{agent.name}</span>
-          <div className="ml-auto flex items-center gap-2">
-            <button className="p-1 hover:bg-[#2a2a3e] rounded transition-colors">
-              <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-            <div className="flex items-center gap-1.5 ml-2 text-xs text-gray-400">
-              <div className="w-5 h-5 rounded-full bg-purple-600/20 flex items-center justify-center">
-                <svg className="w-3 h-3 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-              <span>Assistant</span>
+          <span className={`text-xs font-medium ${d ? "text-gray-200" : "text-gray-800"}`}>{agent.name}</span>
+          <div className="ml-auto flex items-center gap-1.5 text-xs">
+            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${d ? "bg-purple-600/20" : "bg-purple-100"}`}>
+              <svg className={`w-3 h-3 ${d ? "text-purple-400" : "text-purple-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
             </div>
+            <span className={d ? "text-gray-400" : "text-gray-600"}>Assistant</span>
           </div>
         </div>
 
         {/* Chat Content */}
         <div className="flex-1 overflow-y-auto px-4 py-4">
           {messages.length === 0 ? (
-            <WelcomeScreen agent={agent} onQuestionClick={handleQuestionClick} />
+            <WelcomeScreen agent={agent} onQuestionClick={handleQuestionClick} dark={d} />
           ) : (
             <div className="max-w-2xl">
               {messages.map((msg) => (
                 <div key={msg.id} className="mb-4">
                   {msg.role === "user" ? (
                     <div className="flex justify-end">
-                      <div className="bg-purple-600/20 border border-purple-600/30 text-purple-200 px-4 py-2 rounded-lg text-xs max-w-[80%]">
-                        {msg.content}
-                      </div>
+                      <div className={`px-4 py-2 rounded-lg text-xs max-w-[80%] ${d ? "bg-purple-600/20 border border-purple-600/30 text-purple-200" : "bg-purple-100 border border-purple-200 text-purple-800"}`}>{msg.content}</div>
                     </div>
                   ) : (
-                    <div className="bg-[#12121f] border border-[#2a2a3e] rounded-lg px-4 py-3 text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">
-                      {msg.content}
-                    </div>
+                    <div className={`rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap ${d ? "bg-[#12121f] border border-[#2a2a3e] text-gray-300" : "bg-gray-50 border border-gray-200 text-gray-700"}`}>{msg.content}</div>
                   )}
                 </div>
               ))}
@@ -158,33 +143,19 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-[#2a2a3e] px-4 py-3 flex-shrink-0 bg-[#12121f]">
-          <div className="flex items-center gap-2 border border-[#2a2a3e] rounded-lg px-3 py-2 bg-[#0d0d1a] focus-within:border-purple-600/50 transition-colors">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
-              placeholder={`Ask ${agent.name} anything... Press Enter to send`}
-              className="flex-1 outline-none text-xs text-gray-200 placeholder-gray-600 bg-transparent"
-            />
-            <button
-              onClick={handleSend}
-              className="p-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white transition-colors"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
+        <div className={`border-t px-4 py-3 flex-shrink-0 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-white"}`}>
+          <div className={`flex items-center gap-2 border rounded-lg px-3 py-2 transition-colors ${d ? "border-[#2a2a3e] bg-[#0d0d1a] focus-within:border-purple-600/50" : "border-gray-300 bg-white focus-within:border-purple-400"}`}>
+            <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSend()} placeholder={`Ask ${agent.name} anything... Press Enter to send`} className={`flex-1 outline-none text-xs bg-transparent ${d ? "text-gray-200 placeholder-gray-600" : "text-gray-700 placeholder-gray-400"}`} />
+            <button onClick={handleSend} className="p-1.5 bg-purple-600 hover:bg-purple-700 rounded text-white transition-colors">
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
             </button>
           </div>
           <div className="flex items-center justify-between mt-1.5">
-            <button onClick={handleClear} className="flex items-center gap-1 text-[10px] text-gray-600 hover:text-gray-400 transition-colors">
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+            <button onClick={handleClear} className={`flex items-center gap-1 text-[10px] transition-colors ${d ? "text-gray-600 hover:text-gray-400" : "text-gray-400 hover:text-gray-600"}`}>
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               <span>Clear Chat</span>
             </button>
-            <span className="text-[10px] text-gray-600">© 2025 item.com</span>
+            <span className={`text-[10px] ${d ? "text-gray-600" : "text-gray-400"}`}>© 2025 item.com</span>
           </div>
         </div>
       </div>
@@ -195,33 +166,18 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   );
 }
 
-function WelcomeScreen({
-  agent,
-  onQuestionClick,
-}: {
-  agent: AgentInfo;
-  onQuestionClick: (q: string) => void;
-}) {
+function WelcomeScreen({ agent, onQuestionClick, dark }: { agent: AgentInfo; onQuestionClick: (q: string) => void; dark: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center h-full px-8">
       <div className="max-w-md text-center">
-        <div className="w-12 h-12 rounded-full bg-purple-600/10 flex items-center justify-center mx-auto mb-4">
-          <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${dark ? "bg-purple-600/10" : "bg-purple-50"}`}>
+          <svg className={`w-6 h-6 ${dark ? "text-purple-400" : "text-purple-600"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
         </div>
-        <h1 className="text-lg font-bold text-white mb-2">{agent.name}</h1>
-        <p className="text-[11px] text-gray-400 leading-relaxed mb-6">{agent.welcomeMessage}</p>
-
+        <h1 className={`text-lg font-bold mb-2 ${dark ? "text-white" : "text-gray-900"}`}>{agent.name}</h1>
+        <p className={`text-[11px] leading-relaxed mb-6 ${dark ? "text-gray-400" : "text-gray-500"}`}>{agent.welcomeMessage}</p>
         <div className="flex flex-wrap justify-center gap-2">
           {agent.suggestedQuestions.map((q, i) => (
-            <button
-              key={i}
-              onClick={() => onQuestionClick(q)}
-              className="px-3 py-1.5 text-[11px] border border-[#2a2a3e] rounded-full hover:border-purple-600/50 hover:bg-purple-600/10 hover:text-purple-300 text-gray-400 transition-colors"
-            >
-              {q}
-            </button>
+            <button key={i} onClick={() => onQuestionClick(q)} className={`px-3 py-1.5 text-[11px] border rounded-full transition-colors ${dark ? "border-[#2a2a3e] hover:border-purple-600/50 hover:bg-purple-600/10 hover:text-purple-300 text-gray-400" : "border-gray-300 hover:border-purple-400 hover:bg-purple-50 hover:text-purple-700 text-gray-600"}`}>{q}</button>
           ))}
         </div>
       </div>
