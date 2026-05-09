@@ -17,7 +17,7 @@ export default function ResultPanel({ results, quickActions, onQuickAction, onSa
   const { theme } = useTheme();
   const d = theme === "dark";
   const hasResults = results.length > 0;
-  const panelWidth = hasResults ? "w-[520px]" : "w-[280px]";
+  const panelWidth = hasResults ? "w-[600px]" : "w-[280px]";
 
   const handleExportXLS = () => {
     if (!caseData) return;
@@ -39,9 +39,9 @@ export default function ResultPanel({ results, quickActions, onQuickAction, onSa
   };
 
   return (
-    <div className={`${panelWidth} border-l flex flex-col flex-shrink-0 transition-all duration-300 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-white"}`}>
+    <div className={`${panelWidth} border-l flex flex-col flex-shrink-0 transition-all duration-300 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-gray-50"}`}>
       {/* Panel Header */}
-      <div className={`h-11 border-b flex items-center px-4 flex-shrink-0 ${d ? "border-[#2a2a3e]" : "border-gray-200"}`}>
+      <div className={`h-11 border-b flex items-center px-4 flex-shrink-0 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-white"}`}>
         <span className={`text-xs font-medium ${d ? "text-gray-300" : "text-gray-700"}`}>
           {hasResults ? "Results" : "Quick Actions"}
         </span>
@@ -92,49 +92,49 @@ export default function ResultPanel({ results, quickActions, onQuickAction, onSa
 
 function CaseInlineView({ caseData }: { caseData: SavedCase }) {
   return (
-    <div className="bg-white text-gray-900 min-h-full">
-      <div className="px-5 pt-5 pb-3">
+    <div className="bg-gray-50 text-gray-900 min-h-full">
+      <div className="px-6 pt-6 pb-4">
         <h2 className="text-base font-bold text-gray-900">{caseData.name}</h2>
         <p className="text-[10px] text-gray-500 mt-0.5">Real-time overview with alerts and detailed records</p>
       </div>
-      <div className="px-5 pb-4">
+      <div className="px-6 pb-4">
         <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Overview</p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {caseData.summary.map((card, i) => {
             const borderColor = { purple: "border-l-purple-500", green: "border-l-green-500", orange: "border-l-orange-500", blue: "border-l-blue-500" }[card.color];
             const changeColor = card.changeType === "up" ? "text-green-600" : card.changeType === "down" ? "text-red-500" : "text-gray-400";
             return (
-              <div key={i} className={`border border-gray-200 border-l-4 ${borderColor} rounded-md p-3`}>
-                <p className="text-[9px] text-gray-500">{card.label}</p>
-                <p className="text-lg font-bold text-gray-900 mt-0.5">{card.value}</p>
-                {card.change && <p className={`text-[9px] mt-0.5 ${changeColor}`}>{card.change}</p>}
+              <div key={i} className={`bg-white border border-gray-200 border-l-4 ${borderColor} rounded-lg p-4`}>
+                <p className="text-[10px] text-gray-500">{card.label}</p>
+                <p className="text-xl font-bold text-gray-900 mt-1">{card.value}</p>
+                {card.change && <p className={`text-[9px] mt-1 ${changeColor}`}>{card.change}</p>}
               </div>
             );
           })}
         </div>
       </div>
       {caseData.alerts.length > 0 && (
-        <div className="px-5 pb-4">
+        <div className="px-6 pb-4">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Alerts & Recommendations</p>
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             {caseData.alerts.map((alert, i) => {
               const styles = { warning: "bg-orange-50 border-orange-200 text-orange-800", info: "bg-blue-50 border-blue-200 text-blue-800", success: "bg-green-50 border-green-200 text-green-800" };
               const icons = { warning: "⚠️", info: "ℹ️", success: "✅" };
-              return (<div key={i} className={`flex items-center gap-2 px-3 py-2 rounded border text-[10px] ${styles[alert.type]}`}><span>{icons[alert.type]}</span><span>{alert.message}</span></div>);
+              return (<div key={i} className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[11px] ${styles[alert.type]}`}><span>{icons[alert.type]}</span><span>{alert.message}</span></div>);
             })}
           </div>
         </div>
       )}
-      <div className="px-5 pb-5">
+      <div className="px-6 pb-6">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Detail Records</p>
           <span className="text-[9px] text-gray-400">{caseData.tableData.length} records</span>
         </div>
-        <div className="border border-gray-200 rounded-md overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-[10px]">
-              <thead><tr className="bg-gray-50 border-b border-gray-200">{caseData.tableColumns.map((col) => (<th key={col} className="text-left px-3 py-2 font-medium text-gray-600 whitespace-nowrap">{col}</th>))}</tr></thead>
-              <tbody>{caseData.tableData.map((row, i) => (<tr key={i} className="border-b border-gray-100 hover:bg-gray-50">{caseData.tableColumns.map((col) => (<td key={col} className="px-3 py-2 text-gray-700 whitespace-nowrap">{col === "Status" ? <StatusBadge value={String(row[col])} /> : String(row[col] ?? "")}</td>))}</tr>))}</tbody>
+            <table className="w-full text-[11px]">
+              <thead><tr className="bg-gray-50 border-b border-gray-200">{caseData.tableColumns.map((col) => (<th key={col} className="text-left px-4 py-2.5 font-medium text-gray-600 whitespace-nowrap">{col}</th>))}</tr></thead>
+              <tbody>{caseData.tableData.map((row, i) => (<tr key={i} className="border-b border-gray-100 hover:bg-gray-50">{caseData.tableColumns.map((col) => (<td key={col} className="px-4 py-2.5 text-gray-700 whitespace-nowrap">{col === "Status" ? <StatusBadge value={String(row[col])} /> : String(row[col] ?? "")}</td>))}</tr>))}</tbody>
             </table>
           </div>
         </div>
