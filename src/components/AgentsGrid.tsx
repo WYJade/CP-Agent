@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { agentCategories, AgentInfo } from "@/data/agents";
 
 interface AgentsGridProps {
   onSelectAgent: (agent: AgentInfo) => void;
+  onChat: (message: string) => void;
 }
 
 function getAgentIcon(agentId: string) {
@@ -115,7 +117,7 @@ function getAgentIcon(agentId: string) {
   }
 }
 
-export default function AgentsGrid({ onSelectAgent }: AgentsGridProps) {
+export default function AgentsGrid({ onSelectAgent, onChat }: AgentsGridProps) {
   // Group categories into combined rows to fill space
   const rows: { title: string; agents: AgentInfo[] }[] = [
     {
@@ -195,11 +197,53 @@ export default function AgentsGrid({ onSelectAgent }: AgentsGridProps) {
           ))}
         </div>
 
+        {/* Chat Input */}
+        <ChatInput onChat={onChat} />
+
         {/* Footer */}
-        <div className="mt-12 pt-6 border-t border-[#1e1e32] text-center">
+        <div className="mt-8 pt-6 border-t border-[#1e1e32] text-center">
           <p className="text-[11px] text-gray-600">© 2025 item.com · AI Agent Platform</p>
         </div>
       </div>
+    </div>
+  );
+}
+
+function ChatInput({ onChat }: { onChat: (message: string) => void }) {
+  const [value, setValue] = useState("");
+
+  const handleSend = () => {
+    if (!value.trim()) return;
+    onChat(value);
+    setValue("");
+  };
+
+  return (
+    <div className="mt-10">
+      <div className="flex items-center gap-3 border border-[#2a2a3e] rounded-xl px-4 py-3 bg-[#12121f] focus-within:border-purple-500/40 transition-colors">
+        <svg className="w-5 h-5 text-gray-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSend()}
+          placeholder="Hi! I'm your AI assistant. Ask me anything — e.g. 'Check inventory status' or 'Help me create a purchase order'..."
+          className="flex-1 outline-none text-sm text-gray-200 placeholder-gray-600 bg-transparent"
+        />
+        <button
+          onClick={handleSend}
+          className="p-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-white transition-colors flex-shrink-0"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
+      </div>
+      <p className="text-[10px] text-gray-600 mt-2 text-center">
+        Press Enter to send · I'll route your question to the best agent automatically
+      </p>
     </div>
   );
 }

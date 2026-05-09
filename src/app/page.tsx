@@ -4,20 +4,30 @@ import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import AgentsGrid from "@/components/AgentsGrid";
 import ChatArea from "@/components/ChatArea";
-import { AgentInfo } from "@/data/agents";
+import { AgentInfo, allAgents } from "@/data/agents";
 
 type View = "home" | "agents" | "favorites";
 
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>("agents");
   const [selectedAgent, setSelectedAgent] = useState<AgentInfo | null>(null);
+  const [initialMessage, setInitialMessage] = useState<string>("");
 
   const handleSelectAgent = (agent: AgentInfo) => {
+    setInitialMessage("");
     setSelectedAgent(agent);
   };
 
   const handleBack = () => {
     setSelectedAgent(null);
+    setInitialMessage("");
+  };
+
+  const handleChat = (message: string) => {
+    // Route to the first agent by default and pass the message
+    const defaultAgent = allAgents[0];
+    setInitialMessage(message);
+    setSelectedAgent(defaultAgent);
   };
 
   return (
@@ -35,9 +45,9 @@ export default function Home() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Content Area */}
         {selectedAgent ? (
-          <ChatArea agent={selectedAgent} onBack={handleBack} />
+          <ChatArea agent={selectedAgent} onBack={handleBack} initialMessage={initialMessage} />
         ) : currentView === "agents" ? (
-          <AgentsGrid onSelectAgent={handleSelectAgent} />
+          <AgentsGrid onSelectAgent={handleSelectAgent} onChat={handleChat} />
         ) : currentView === "home" ? (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center">

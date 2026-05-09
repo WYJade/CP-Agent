@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AgentInfo } from "@/data/agents";
 import { ChatMessage } from "@/types/agent";
 import ResultPanel from "@/components/ResultPanel";
@@ -22,12 +22,20 @@ export interface ResultContent {
 interface ChatAreaProps {
   agent: AgentInfo;
   onBack: () => void;
+  initialMessage?: string;
 }
 
-export default function ChatArea({ agent, onBack }: ChatAreaProps) {
+export default function ChatArea({ agent, onBack, initialMessage }: ChatAreaProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
+
+  // Handle initial message from Agents page chat input
+  useEffect(() => {
+    if (initialMessage) {
+      processMessage(initialMessage);
+    }
+  }, []);
 
   const addResult = (result: ResultItem) => {
     setResults((prev) => {
