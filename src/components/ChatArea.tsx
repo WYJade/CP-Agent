@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AgentInfo } from "@/data/agents";
-import { ChatMessage } from "@/types/agent";
+import { ChatMessage, SavedCase } from "@/types/agent";
 import ResultPanel from "@/components/ResultPanel";
 
 export interface ResultItem {
@@ -23,9 +23,10 @@ interface ChatAreaProps {
   agent: AgentInfo;
   onBack: () => void;
   initialMessage?: string;
+  onSaveCase?: (caseData: SavedCase) => void;
 }
 
-export default function ChatArea({ agent, onBack, initialMessage }: ChatAreaProps) {
+export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: ChatAreaProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
@@ -85,6 +86,47 @@ export default function ChatArea({ agent, onBack, initialMessage }: ChatAreaProp
 
   const handleClear = () => {
     setMessages([]);
+  };
+
+  const handleSaveAsCase = () => {
+    if (!onSaveCase || results.length === 0) return;
+
+    const latestResult = results[0];
+    const caseName = latestResult.title || `${agent.name} Report`;
+
+    const caseData: SavedCase = {
+      id: Date.now().toString(),
+      name: caseName,
+      createdAt: new Date(),
+      agentName: agent.name,
+      summary: [
+        { label: "SKU Count", value: "1,284", change: "↑12% vs last month", changeType: "up", color: "purple" },
+        { label: "Available Stock", value: "86,420", change: "↓3% vs last week", changeType: "down", color: "green" },
+        { label: "Below Reorder Point", value: "37", change: "↓5% improvement", changeType: "down", color: "orange" },
+        { label: "Total Inventory Value", value: "$2,381,600", change: "↑2% growth", changeType: "up", color: "blue" },
+      ],
+      alerts: [
+        { type: "warning", message: "37 items are below reorder point — consider restocking soon" },
+        { type: "info", message: "Inventory turnover rate is 4.2x, above target of 4.0x" },
+        { type: "success", message: "Fill rate improved to 97.8% this week" },
+      ],
+      tableColumns: ["SKU", "Product Name", "Warehouse", "Category", "Available Stock", "Status"],
+      tableData: [
+        { SKU: "SKU-001234", "Product Name": "Wireless Bluetooth Headset Pro", Warehouse: "Shenzhen", Category: "3C Digital", "Available Stock": 1240, Status: "Normal" },
+        { SKU: "SKU-001234", "Product Name": "Wireless Bluetooth Headset Pro", Warehouse: "Guangzhou", Category: "3C Digital", "Available Stock": 360, Status: "Normal" },
+        { SKU: "SKU-001235", "Product Name": "USB-C Charger 65W", Warehouse: "Guangzhou", Category: "3C Digital", "Available Stock": 170, Status: "Low" },
+        { SKU: "SKU-001235", "Product Name": "USB-C Charger 65W", Warehouse: "Shanghai", Category: "3C Digital", "Available Stock": 520, Status: "Normal" },
+        { SKU: "SKU-001236", "Product Name": "Sports Water Bottle 500ml", Warehouse: "Shanghai", Category: "Outdoor Sports", "Available Stock": 3560, Status: "Normal" },
+        { SKU: "SKU-001236", "Product Name": "Sports Water Bottle 500ml", Warehouse: "Yiwu", Category: "Outdoor Sports", "Available Stock": 1200, Status: "Normal" },
+        { SKU: "SKU-001237", "Product Name": "LED Desk Lamp Smart", Warehouse: "Shenzhen", Category: "Home Appliance", "Available Stock": 0, Status: "Out" },
+        { SKU: "SKU-001238", "Product Name": "Folding Umbrella Large", Warehouse: "Yiwu", Category: "Daily Essentials", "Available Stock": 2100, Status: "Normal" },
+        { SKU: "SKU-001239", "Product Name": "Children Building Blocks Set", Warehouse: "Guangzhou", Category: "Toys", "Available Stock": 80, Status: "Low" },
+        { SKU: "SKU-001240", "Product Name": "Stainless Steel Thermos", Warehouse: "Shanghai", Category: "Kitchen", "Available Stock": 890, Status: "Normal" },
+      ],
+    };
+
+    onSaveCase(caseData);
+    alert(`Case "${caseName}" saved to My Case Library!`);
   };
 
   return (
@@ -180,7 +222,7 @@ export default function ChatArea({ agent, onBack, initialMessage }: ChatAreaProp
       </div>
 
       {/* Right Panel */}
-      <ResultPanel results={results} quickActions={agent.quickActions} onQuickAction={handleQuickAction} />
+      <ResultPanel results={results} quickActions={agent.quickActions} onQuickAction={handleQuickAction} onSaveAsCase={handleSaveAsCase} />
     </div>
   );
 }
