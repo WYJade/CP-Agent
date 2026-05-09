@@ -39,7 +39,7 @@ export default function ResultPanel({ results, quickActions, onQuickAction, onSa
   };
 
   return (
-    <div className={`${panelWidth} border-l flex flex-col flex-shrink-0 transition-all duration-300 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-gray-50"}`}>
+    <div className={`${panelWidth} border-l flex flex-col flex-shrink-0 transition-all duration-300 ${d ? "border-[#2a2a3e] bg-[#0d0d1a]" : "border-gray-200 bg-gray-50"}`}>
       {/* Panel Header */}
       <div className={`h-11 border-b flex items-center px-4 flex-shrink-0 ${d ? "border-[#2a2a3e] bg-[#12121f]" : "border-gray-200 bg-white"}`}>
         <span className={`text-xs font-medium ${d ? "text-gray-300" : "text-gray-700"}`}>
@@ -91,50 +91,58 @@ export default function ResultPanel({ results, quickActions, onQuickAction, onSa
 }
 
 function CaseInlineView({ caseData }: { caseData: SavedCase }) {
+  // Always rendered inside the panel which handles outer bg
   return (
-    <div className="bg-gray-50 text-gray-900 min-h-full">
-      <div className="px-6 pt-6 pb-4">
-        <h2 className="text-base font-bold text-gray-900">{caseData.name}</h2>
+    <div className="min-h-full px-6 pt-6 pb-6 space-y-5">
+      {/* Title */}
+      <div>
+        <h2 className="text-base font-bold text-white">{caseData.name}</h2>
         <p className="text-[10px] text-gray-500 mt-0.5">Real-time overview with alerts and detailed records</p>
       </div>
-      <div className="px-6 pb-4">
+
+      {/* Summary Cards */}
+      <div>
         <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Overview</p>
         <div className="grid grid-cols-2 gap-3">
           {caseData.summary.map((card, i) => {
             const borderColor = { purple: "border-l-purple-500", green: "border-l-green-500", orange: "border-l-orange-500", blue: "border-l-blue-500" }[card.color];
-            const changeColor = card.changeType === "up" ? "text-green-600" : card.changeType === "down" ? "text-red-500" : "text-gray-400";
+            const changeColor = card.changeType === "up" ? "text-green-400" : card.changeType === "down" ? "text-red-400" : "text-gray-500";
             return (
-              <div key={i} className={`bg-white border border-gray-200 border-l-4 ${borderColor} rounded-lg p-4`}>
+              <div key={i} className={`bg-[#12121f] border border-[#2a2a3e] border-l-4 ${borderColor} rounded-lg p-4`}>
                 <p className="text-[10px] text-gray-500">{card.label}</p>
-                <p className="text-xl font-bold text-gray-900 mt-1">{card.value}</p>
+                <p className="text-xl font-bold text-white mt-1">{card.value}</p>
                 {card.change && <p className={`text-[9px] mt-1 ${changeColor}`}>{card.change}</p>}
               </div>
             );
           })}
         </div>
       </div>
+
+      {/* Alerts */}
       {caseData.alerts.length > 0 && (
-        <div className="px-6 pb-4">
+        <div>
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider mb-2">Alerts & Recommendations</p>
           <div className="space-y-2">
             {caseData.alerts.map((alert, i) => {
-              const styles = { warning: "bg-orange-50 border-orange-200 text-orange-800", info: "bg-blue-50 border-blue-200 text-blue-800", success: "bg-green-50 border-green-200 text-green-800" };
+              const styles = { warning: "bg-orange-900/20 border-orange-700/30 text-orange-300", info: "bg-blue-900/20 border-blue-700/30 text-blue-300", success: "bg-green-900/20 border-green-700/30 text-green-300" };
               const icons = { warning: "⚠️", info: "ℹ️", success: "✅" };
               return (<div key={i} className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-[11px] ${styles[alert.type]}`}><span>{icons[alert.type]}</span><span>{alert.message}</span></div>);
             })}
           </div>
         </div>
       )}
-      <div className="px-6 pb-6">
+
+      {/* Table */}
+      <div>
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Detail Records</p>
-          <span className="text-[9px] text-gray-400">{caseData.tableData.length} records</span>
+          <span className="text-[9px] text-gray-600">{caseData.tableData.length} records</span>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="bg-[#12121f] border border-[#2a2a3e] rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-[11px]">
-              <thead><tr className="bg-gray-50 border-b border-gray-200">{caseData.tableColumns.map((col) => (<th key={col} className="text-left px-4 py-2.5 font-medium text-gray-600 whitespace-nowrap">{col}</th>))}</tr></thead>
-              <tbody>{caseData.tableData.map((row, i) => (<tr key={i} className="border-b border-gray-100 hover:bg-gray-50">{caseData.tableColumns.map((col) => (<td key={col} className="px-4 py-2.5 text-gray-700 whitespace-nowrap">{col === "Status" ? <StatusBadge value={String(row[col])} /> : String(row[col] ?? "")}</td>))}</tr>))}</tbody>
+              <thead><tr className="border-b border-[#2a2a3e] bg-[#1a1a2e]">{caseData.tableColumns.map((col) => (<th key={col} className="text-left px-4 py-2.5 font-medium text-gray-400 whitespace-nowrap">{col}</th>))}</tr></thead>
+              <tbody>{caseData.tableData.map((row, i) => (<tr key={i} className="border-b border-[#1e1e32] hover:bg-[#1a1a2e]">{caseData.tableColumns.map((col) => (<td key={col} className="px-4 py-2.5 text-gray-300 whitespace-nowrap">{col === "Status" ? <StatusBadge value={String(row[col])} /> : String(row[col] ?? "")}</td>))}</tr>))}</tbody>
             </table>
           </div>
         </div>
@@ -145,10 +153,10 @@ function CaseInlineView({ caseData }: { caseData: SavedCase }) {
 
 function StatusBadge({ value }: { value: string }) {
   const lower = value.toLowerCase();
-  let cls = "bg-gray-100 text-gray-600";
-  if (lower === "normal" || lower === "healthy") cls = "bg-green-100 text-green-700";
-  if (lower === "low" || lower === "warning") cls = "bg-yellow-100 text-yellow-700";
-  if (lower === "critical" || lower === "out" || lower === "overdue") cls = "bg-red-100 text-red-700";
+  let cls = "bg-gray-800 text-gray-300";
+  if (lower === "normal" || lower === "healthy") cls = "bg-green-900/40 text-green-400";
+  if (lower === "low" || lower === "warning") cls = "bg-yellow-900/40 text-yellow-400";
+  if (lower === "critical" || lower === "out" || lower === "overdue") cls = "bg-red-900/40 text-red-400";
   return <span className={`px-1.5 py-0.5 rounded text-[9px] font-medium ${cls}`}>{value}</span>;
 }
 
