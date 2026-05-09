@@ -34,6 +34,8 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   const [inputValue, setInputValue] = useState("");
   const [results, setResults] = useState<ResultItem[]>([]);
   const [currentCaseData, setCurrentCaseData] = useState<SavedCase | null>(null);
+  const [followUpGuide, setFollowUpGuide] = useState<string>("");
+  const [suggestedFollowUps, setSuggestedFollowUps] = useState<string[]>([]);
 
   // Handle initial message from Agents page chat input
   useEffect(() => {
@@ -47,8 +49,11 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
       const updated = [result, ...prev];
       return updated.slice(0, 3);
     });
-    // Generate inline case data for the right panel
     setCurrentCaseData(generateCaseData(result.title, agent.name));
+    // Generate follow-up guidance based on the result
+    const guidance = generateFollowUpGuidance(result.title);
+    setFollowUpGuide(guidance.guide);
+    setSuggestedFollowUps(guidance.questions);
   };
 
   const handleSend = () => {
@@ -150,7 +155,22 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
             </button>
           </div>
-          <div className="flex items-center justify-between mt-1.5">
+
+          {/* Follow-up guidance & suggested questions below input */}
+          {followUpGuide && messages.length > 0 && (
+            <p className={`text-[10px] mt-2 px-1 ${d ? "text-gray-500" : "text-gray-500"}`}>
+              💡 {followUpGuide}
+            </p>
+          )}
+          <div className="flex flex-wrap gap-1.5 mt-2">
+            {(messages.length === 0 ? agent.suggestedQuestions : suggestedFollowUps).map((q, i) => (
+              <button key={i} onClick={() => handleQuestionClick(q)} className={`px-2.5 py-1 text-[10px] border rounded-full transition-colors ${d ? "border-[#2a2a3e] text-gray-500 hover:border-purple-600/40 hover:text-purple-400 hover:bg-purple-600/5" : "border-gray-200 text-gray-500 hover:border-purple-300 hover:text-purple-600 hover:bg-purple-50"}`}>
+                {q}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between mt-2">
             <button onClick={handleClear} className={`flex items-center gap-1 text-[10px] transition-colors ${d ? "text-gray-600 hover:text-gray-400" : "text-gray-400 hover:text-gray-600"}`}>
               <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
               <span>Clear Chat</span>
@@ -183,6 +203,77 @@ function WelcomeScreen({ agent, onQuestionClick, dark }: { agent: AgentInfo; onQ
       </div>
     </div>
   );
+}
+
+// Generate follow-up guidance based on the last result
+function generateFollowUpGuidance(title: string): { guide: string; questions: string[] } {
+  const t = title.toLowerCase();
+
+  if (t.includes("health") || t.includes("overview")) {
+    return {
+      guide: "You now have a full inventory health snapshot. Consider drilling into critical items or exploring optimization opportunities to reduce carrying costs.",
+      questions: [
+        "Show critical items detail",
+        "What's causing the overstock?",
+        "Suggest reorder optimizations",
+        "Compare with last month",
+      ],
+    };
+  }
+  if (t.includes("reorder") || t.includes("below")) {
+    return {
+      guide: "These items need attention soon. You can generate purchase orders for urgent items or analyze why they dropped below reorder point.",
+      questions: [
+        "Generate PO for critical items",
+        "Why did these items drop?",
+        "Adjust reorder points",
+        "Show supplier lead times",
+      ],
+    };
+  }
+  if (t.includes("turnover")) {
+    return {
+      guide: "Turnover analysis reveals slow-moving inventory. Consider markdown strategies for dead stock or increasing promotion for slow movers.",
+      questions: [
+        "Markdown recommendations",
+        "Promote slow movers",
+        "Dead stock liquidation plan",
+        "Category-level breakdown",
+      ],
+    };
+  }
+  if (t.includes("forecast") || t.includes("demand")) {
+    return {
+      guide: "Based on the forecast, you may want to pre-order high-demand items or negotiate bulk pricing with suppliers before the demand spike.",
+      questions: [
+        "Pre-order recommendations",
+        "Negotiate bulk pricing",
+        "Seasonal trend analysis",
+        "Risk assessment for stockouts",
+      ],
+    };
+  }
+  if (t.includes("dead") || t.includes("stock report")) {
+    return {
+      guide: "Dead stock ties up capital. Consider liquidation channels, bundling strategies, or write-off decisions to free up warehouse space.",
+      questions: [
+        "Liquidation options",
+        "Bundle with fast movers",
+        "Calculate write-off impact",
+        "Free up warehouse space",
+      ],
+    };
+  }
+  // Default
+  return {
+    guide: "Based on this analysis, you can explore related metrics, drill into specific items, or take action on the recommendations provided.",
+    questions: [
+      "Show more details",
+      "Export full report",
+      "Compare with previous period",
+      "What actions should I take?",
+    ],
+  };
 }
 
 // Generate case data for the right panel
