@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { AgentInfo } from "@/data/agents";
 import { ChatMessage, SavedCase } from "@/types/agent";
 import ResultPanel from "@/components/ResultPanel";
+import SaveCaseModal from "@/components/SaveCaseModal";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface ResultItem {
@@ -36,6 +37,7 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   const [currentCaseData, setCurrentCaseData] = useState<SavedCase | null>(null);
   const [followUpGuide, setFollowUpGuide] = useState<string>("");
   const [suggestedFollowUps, setSuggestedFollowUps] = useState<string[]>([]);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   // Handle initial message from Agents page chat input
   useEffect(() => {
@@ -101,11 +103,14 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
 
   const handleSaveAsCase = () => {
     if (!onSaveCase || !currentCaseData) return;
-    const defaultName = currentCaseData.name || `${agent.name} Report`;
-    const caseName = prompt("Enter a name for this case:", defaultName);
-    if (!caseName) return; // User cancelled
+    setShowSaveModal(true);
+  };
+
+  const handleConfirmSave = (caseName: string) => {
+    if (!onSaveCase || !currentCaseData) return;
     const savedCase: SavedCase = { ...currentCaseData, id: Date.now().toString(), name: caseName, createdAt: new Date() };
     onSaveCase(savedCase);
+    setShowSaveModal(false);
   };
 
   return (
@@ -185,6 +190,15 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
 
       {/* Right Panel */}
       <ResultPanel results={results} quickActions={agent.quickActions} onQuickAction={handleQuickAction} onSaveAsCase={handleSaveAsCase} caseData={currentCaseData} />
+
+      {/* Save Case Modal */}
+      {showSaveModal && currentCaseData && (
+        <SaveCaseModal
+          defaultName={currentCaseData.name || `${agent.name} Report`}
+          onSave={handleConfirmSave}
+          onCancel={() => setShowSaveModal(false)}
+        />
+      )}
     </div>
   );
 }
