@@ -41,11 +41,10 @@ export default function Sidebar({ currentView, onNavigate, savedCases, onSelectC
         <NavItem icon="home" label="Home" active={currentView === "home"} onClick={() => onNavigate("home")} dark={d} />
         <NavItem icon="agents" label="AI Agents" active={currentView === "agents"} onClick={() => onNavigate("agents")} dark={d} />
         <NavItem icon="cases" label="My Case Library" active={currentView === "cases"} onClick={() => onNavigate("cases")} dark={d} />
-        <NavItem icon="favorites" label="Favorites" active={currentView === "favorites"} onClick={() => onNavigate("favorites")} dark={d} />
 
+        {/* Saved Cases as sub-menu under My Case Library */}
         {savedCases.length > 0 && (
-          <div className={`mt-4 pt-3 border-t ${d ? "border-[#2a2a3e]" : "border-gray-200"}`}>
-            <p className={`px-2.5 text-[10px] font-semibold uppercase tracking-wider mb-2 ${d ? "text-gray-600" : "text-gray-400"}`}>Saved Cases</p>
+          <div className="ml-6 mt-0.5">
             {savedCases.map((c) => (
               <button key={c.id} onClick={() => onSelectCase(c)} className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-[11px] transition-colors mb-0.5 truncate ${d ? "text-gray-500 hover:bg-[#1e1e32] hover:text-gray-300" : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}>
                 <svg className={`w-3 h-3 flex-shrink-0 ${d ? "text-gray-600" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
@@ -54,6 +53,8 @@ export default function Sidebar({ currentView, onNavigate, savedCases, onSelectC
             ))}
           </div>
         )}
+
+        <NavItem icon="favorites" label="Favorites" active={currentView === "favorites"} onClick={() => onNavigate("favorites")} dark={d} />
       </div>
 
       {/* Bottom User */}
