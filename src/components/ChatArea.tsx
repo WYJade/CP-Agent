@@ -101,8 +101,11 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
 
   const handleSaveAsCase = () => {
     if (!onSaveCase || !currentCaseData) return;
-    onSaveCase(currentCaseData);
-    alert(`Case "${currentCaseData.name}" saved to My Case Library!`);
+    const defaultName = currentCaseData.name || `${agent.name} Report`;
+    const caseName = prompt("Enter a name for this case:", defaultName);
+    if (!caseName) return; // User cancelled
+    const savedCase: SavedCase = { ...currentCaseData, id: Date.now().toString(), name: caseName, createdAt: new Date() };
+    onSaveCase(savedCase);
   };
 
   return (
