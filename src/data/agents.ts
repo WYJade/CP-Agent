@@ -93,9 +93,9 @@ export const agentCategories: AgentCategory[] = [
         description: "Manages inbound shipments, receiving, and dock scheduling.",
         welcomeMessage: "Welcome! I am your Inbound Agent. I can help you track inbound shipments, manage receiving processes, and schedule dock appointments.",
         suggestedQuestions: [
+          "Print carton labels for IB20250514001",
+          "Modify and print labels for IB20250514001",
           "What shipments are arriving today?",
-          "Show receiving dock schedule",
-          "Any delayed inbound shipments?",
         ],
         quickActions: [
           { label: "Today's inbound shipments", icon: "chart", color: "purple" },

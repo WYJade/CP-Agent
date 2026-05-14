@@ -5,6 +5,8 @@ import { AgentInfo } from "@/data/agents";
 import { ChatMessage, SavedCase } from "@/types/agent";
 import ResultPanel from "@/components/ResultPanel";
 import SaveCaseModal from "@/components/SaveCaseModal";
+import PrintLabelModal, { CartonLabel } from "@/components/PrintLabelModal";
+import EditLabelModal from "@/components/EditLabelModal";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface ResultItem {
@@ -38,6 +40,9 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   const [followUpGuide, setFollowUpGuide] = useState<string>("");
   const [suggestedFollowUps, setSuggestedFollowUps] = useState<string[]>([]);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [cartonLabels, setCartonLabels] = useState<CartonLabel[]>([]);
 
   // Handle initial message from Agents page chat input
   useEffect(() => {
@@ -73,6 +78,46 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
     };
     setMessages((prev) => [...prev, userMessage]);
 
+    // Check for print/edit label intent (Inbound Agent)
+    const lowerText = text.toLowerCase();
+    const inboundNoMatch = text.match(/(?:inbound|入库单|IB)[#\s-]*(\w+)/i) || text.match(/(IB\d+)/i);
+    const inboundNo = inboundNoMatch ? inboundNoMatch[1] : "IB20250514001";
+
+    if (agent.id === "inbound-agent" && (lowerText.includes("print") || lowerText.includes("打印") || lowerText.includes("label") || lowerText.includes("箱唛"))) {
+      const isEditFirst = lowerText.includes("modify") || lowerText.includes("edit") || lowerText.includes("change") || lowerText.includes("修改") || lowerText.includes("update");
+
+      // Generate mock carton labels
+      const mockLabels: CartonLabel[] = [
+        { inboundNo, cartonNo: "CTN-001", sku: "SKU-4521", productName: "Wireless Bluetooth Headset Pro", qty: 50, weight: "12.5 kg", dimensions: "60×40×35 cm", warehouse: "Shenzhen WH-A", destination: "Zone B-3", poNo: "PO-20250510" },
+        { inboundNo, cartonNo: "CTN-002", sku: "SKU-4521", productName: "Wireless Bluetooth Headset Pro", qty: 50, weight: "12.5 kg", dimensions: "60×40×35 cm", warehouse: "Shenzhen WH-A", destination: "Zone B-3", poNo: "PO-20250510" },
+        { inboundNo, cartonNo: "CTN-003", sku: "SKU-1893", productName: "USB-C Charger 65W", qty: 100, weight: "8.2 kg", dimensions: "50×35×30 cm", warehouse: "Shenzhen WH-A", destination: "Zone A-1", poNo: "PO-20250510" },
+      ];
+      setCartonLabels(mockLabels);
+
+      setTimeout(() => {
+        if (isEditFirst) {
+          const assistantMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `I've identified your intent to **modify carton label information** before printing.\n\n📋 Inbound No: **${inboundNo}**\n📦 Cartons found: **${mockLabels.length}**\n\nOpening the edit form now. You can modify the fields and save changes. After saving, you can trigger printing with the updated information.`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          setShowEditModal(true);
+        } else {
+          const assistantMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: `I've retrieved the carton label information for inbound order **${inboundNo}**.\n\n📋 Inbound No: **${inboundNo}**\n📦 Cartons: **${mockLabels.length}**\n🏭 Warehouse: Shenzhen WH-A\n\nPlease review the label details and click "Confirm Print" to proceed.`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          setShowPrintModal(true);
+        }
+      }, 800);
+      return;
+    }
+
     setTimeout(() => {
       const response = generateResponse(agent.id, text);
       const assistantMessage: ChatMessage = {
@@ -87,6 +132,29 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
         addResult(response.result);
       }
     }, 800);
+  };
+
+  const handleConfirmPrint = () => {
+    setShowPrintModal(false);
+    const msg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "assistant",
+      content: `✅ **Print job submitted successfully!**\n\n${cartonLabels.length} carton label(s) for inbound order ${cartonLabels[0]?.inboundNo} have been sent to the printer.\n\nPrint queue status: Processing...`,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, msg]);
+  };
+
+  const handleSaveLabels = (updatedLabels: CartonLabel[]) => {
+    setCartonLabels(updatedLabels);
+    setShowEditModal(false);
+    const msg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "assistant",
+      content: `✅ **Label information saved successfully!**\n\nUpdated ${updatedLabels.length} carton label(s) for inbound order ${updatedLabels[0]?.inboundNo}.\n\nYou can now print the updated labels by saying:\n• "Print labels for ${updatedLabels[0]?.inboundNo}"\n• "Print updated carton labels"`,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, msg]);
   };
 
   const handleQuestionClick = (question: string) => {
@@ -197,6 +265,24 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
           defaultName={currentCaseData.name || `${agent.name} Report`}
           onSave={handleConfirmSave}
           onCancel={() => setShowSaveModal(false)}
+        />
+      )}
+
+      {/* Print Label Modal */}
+      {showPrintModal && cartonLabels.length > 0 && (
+        <PrintLabelModal
+          labels={cartonLabels}
+          onConfirmPrint={handleConfirmPrint}
+          onCancel={() => setShowPrintModal(false)}
+        />
+      )}
+
+      {/* Edit Label Modal */}
+      {showEditModal && cartonLabels.length > 0 && (
+        <EditLabelModal
+          labels={cartonLabels}
+          onSave={handleSaveLabels}
+          onCancel={() => setShowEditModal(false)}
         />
       )}
     </div>
