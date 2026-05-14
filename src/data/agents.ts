@@ -181,20 +181,18 @@ export const agentCategories: AgentCategory[] = [
       {
         id: "outbound-agent",
         name: "Outbound Agent",
-        description: "Handles outbound shipment processing, picking, and packing operations.",
-        welcomeMessage: "Welcome! I am your Outbound Agent. I can help you manage outbound shipments, track picking and packing progress, and resolve shipping issues.",
+        description: "Handles outbound shipment processing, picking, packing, and shipping label uploads.",
+        welcomeMessage: "Welcome! I am your Outbound Agent. I can help you manage outbound shipments, upload shipping labels, track picking and packing progress, and resolve shipping issues.",
         suggestedQuestions: [
+          "Upload shipping label for DN-3654668",
           "Show today's outbound shipments",
           "What orders are ready for dispatch?",
-          "Picking efficiency report",
         ],
         quickActions: [
-          { label: "Shipment volume chart", icon: "chart", color: "purple" },
+          { label: "Upload shipping label", icon: "optimize", color: "green" },
+          { label: "Today's outbound shipments", icon: "chart", color: "purple" },
           { label: "Delayed shipments", icon: "warning", color: "yellow" },
-          { label: "Picking progress table", icon: "table", color: "blue" },
-          { label: "Shipping cost report", icon: "report", color: "green" },
-          { label: "Volume forecast", icon: "forecast", color: "purple" },
-          { label: "Optimize pick paths", icon: "optimize", color: "orange" },
+          { label: "Picking progress", icon: "table", color: "blue" },
         ],
       },
       {

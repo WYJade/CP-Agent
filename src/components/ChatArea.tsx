@@ -7,6 +7,7 @@ import ResultPanel from "@/components/ResultPanel";
 import SaveCaseModal from "@/components/SaveCaseModal";
 import PrintLabelModal, { CartonLabel } from "@/components/PrintLabelModal";
 import EditLabelModal from "@/components/EditLabelModal";
+import UploadLabelModal, { UploadFile } from "@/components/UploadLabelModal";
 import { useTheme } from "@/context/ThemeContext";
 
 export interface ResultItem {
@@ -42,7 +43,9 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [cartonLabels, setCartonLabels] = useState<CartonLabel[]>([]);
+  const [uploadOutboundNo, setUploadOutboundNo] = useState("");
 
   // Handle initial message from Agents page chat input
   useEffect(() => {
@@ -118,6 +121,26 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
       return;
     }
 
+    // Check for upload shipping label intent (Outbound Agent)
+    if (agent.id === "outbound-agent" && (lowerText.includes("upload") || lowerText.includes("上传") || lowerText.includes("面单") || lowerText.includes("shipping label") || lowerText.includes("label upload"))) {
+      const outboundMatch = text.match(/(?:outbound|出库单|OB|DN)[#\s-]*(\w+)/i) || text.match(/(DN-?\d+)/i) || text.match(/(OB\d+)/i);
+      const outboundNo = outboundMatch ? outboundMatch[1] : "DN-3654668";
+
+      setUploadOutboundNo(outboundNo);
+
+      setTimeout(() => {
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: `I've verified your access to outbound order **${outboundNo}** and retrieved the order details.\n\n📋 Order ID: **${outboundNo}**\n🏭 Facility: SNA, Valley View, CA\n📦 Status: Ready for shipping label\n\nOpening the upload interface now. You can drag & drop or select files (JPG, PNG, PDF ≤ 10MB).`,
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+        setShowUploadModal(true);
+      }, 800);
+      return;
+    }
+
     setTimeout(() => {
       const response = generateResponse(agent.id, text);
       const assistantMessage: ChatMessage = {
@@ -152,6 +175,17 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
       id: Date.now().toString(),
       role: "assistant",
       content: `✅ **Label information saved successfully!**\n\nUpdated ${updatedLabels.length} carton label(s) for inbound order ${updatedLabels[0]?.inboundNo}.\n\nYou can now print the updated labels by saying:\n• "Print labels for ${updatedLabels[0]?.inboundNo}"\n• "Print updated carton labels"`,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, msg]);
+  };
+
+  const handleUploadFiles = (files: UploadFile[]) => {
+    setShowUploadModal(false);
+    const msg: ChatMessage = {
+      id: Date.now().toString(),
+      role: "assistant",
+      content: `✅ **Shipping label uploaded successfully!**\n\n📋 Outbound Order: **${uploadOutboundNo}**\n📎 Files uploaded: **${files.length}**\n${files.map((f) => `  • ${f.name} (${(f.size / 1024).toFixed(1)} KB)`).join("\n")}\n\nThe shipping label has been bound to order ${uploadOutboundNo} and is now traceable in the system.`,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, msg]);
@@ -283,6 +317,15 @@ export default function ChatArea({ agent, onBack, initialMessage, onSaveCase }: 
           labels={cartonLabels}
           onSave={handleSaveLabels}
           onCancel={() => setShowEditModal(false)}
+        />
+      )}
+
+      {/* Upload Shipping Label Modal */}
+      {showUploadModal && (
+        <UploadLabelModal
+          outboundNo={uploadOutboundNo}
+          onUpload={handleUploadFiles}
+          onCancel={() => setShowUploadModal(false)}
         />
       )}
     </div>
